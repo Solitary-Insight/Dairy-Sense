@@ -28,10 +28,10 @@ export default function Header() {
           <nav
             className=" justify-between  gap-3 hidden md:flex"
           >
-            <a href="#contact" className="text-gray-700 hover:text-green-600 transition-colors">
+            <a href="/#contact" className="text-gray-700 hover:text-green-600 transition-colors">
               {HEADER_LABELS.contact}
             </a>
-            <a href="#pricing" className="text-gray-700 hover:text-green-600 transition-colors">
+            <a href="/#pricing" className="text-gray-700 hover:text-green-600 transition-colors">
               {HEADER_LABELS.pricing}
             </a>
             <a href="/demo" className="text-gray-700 hover:text-green-600 transition-colors">
@@ -40,7 +40,7 @@ export default function Header() {
             <a href="#features" className="text-gray-700 hover:text-green-600 transition-colors">
               {HEADER_LABELS.features}
             </a>
-            <a href="#home" className="text-gray-700 hover:text-green-600 transition-colors">
+            <a href="/" className="text-gray-700 hover:text-green-600 transition-colors">
               {HEADER_LABELS.home}
             </a>
           </nav>
