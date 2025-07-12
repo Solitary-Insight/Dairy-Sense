@@ -45,7 +45,7 @@ export function LanguageProvider({ children }) {
     };
 
     return (
-        <LanguageContext.Provider value={{ language, changeLanguage, dir, meta: LANG_META[language] }}>
+        <LanguageContext.Provider value={{ language, changeLanguage, dir,inverted_dir:dir=='rtl'?'ltr':'rtl', meta: LANG_META[language] }}>
             {children}
         </LanguageContext.Provider>
     );

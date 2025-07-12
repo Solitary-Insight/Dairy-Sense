@@ -9,11 +9,12 @@ import { LANG_CONTENT, LANG_META } from "@/lib/Constants/App/language"
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const { language, changeLanguage, dir, meta } = useLanguage();
+  const { language, changeLanguage, dir, meta,inverted_dir } = useLanguage();
   const HEADER_LABELS = LANG_CONTENT[language].nav
 
   return (
-    <header dir={meta.header} className={`bg-white/95 backdrop-blur-sm border-b border-green-100 sticky top-0 z-50  `}>
+    <header dir={inverted_dir} className={`bg-white/95 backdrop-blur-sm border-b border-green-100 sticky top-0 z-50  `}>
+
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between flex-row-reverse" >
           {/* Logo */}
