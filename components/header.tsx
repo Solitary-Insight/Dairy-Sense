@@ -19,9 +19,9 @@ export default function Header() {
         <div className="flex items-center justify-between flex-row-reverse" >
           {/* Logo */}
           <div className="flex items-center space-x-reverse space-x-2">
-            <span className="text-2xl font-bold text-gray-800">AgroSense</span>
+            <span className="text-2xl font-bold text-gray-800">DairySense</span>
             <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">A</span>
+              <span className="text-white font-bold text-lg">D</span>
             </div>
           </div>
 
@@ -88,21 +88,21 @@ export default function Header() {
         {isMenuOpen && (
           <div className="md:hidden mt-4 pb-4 border-t border-green-100">
             <nav dir={LANG_META[language].dir} className="flex flex-col   space-y-4 mt-4">
-              <a href="#home" className=" text-gray-700 hover:text-green-600 transition-colors">
+              <a href="/" className=" text-gray-700 hover:text-green-600 transition-colors">
                 {HEADER_LABELS.home}
               </a>
-              <a href="#features" className="text-gray-700 hover:text-green-600 transition-colors">
+              <a href="/#features" className="text-gray-700 hover:text-green-600 transition-colors">
                 {HEADER_LABELS.features}
 
               </a>
               <a href="/demo" className="text-gray-700 hover:text-green-600 transition-colors">
                 {HEADER_LABELS.request_demo}
               </a>
-              <a href="#pricing" className="text-gray-700 hover:text-green-600 transition-colors">
+              <a href="/#pricing" className="text-gray-700 hover:text-green-600 transition-colors">
                 {HEADER_LABELS.pricing}
 
               </a>
-              <a href="#contact" className="text-gray-700 hover:text-green-600 transition-colors">
+              <a href="/#contact" className="text-gray-700 hover:text-green-600 transition-colors">
                 {HEADER_LABELS.contact}
 
               </a>
