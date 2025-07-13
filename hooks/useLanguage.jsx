@@ -3,9 +3,9 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { LANG_META } from "../lib/Constants/App/language";
+import { LANG_CONTENT, LANG_META } from "../lib/Constants/App/language";
 import { LANG_LOG_KEY } from "@/lib/Constants/Debugging/LogKeys";
-import { getLang } from '@/lib/Utils/Browser/browserUtils';
+import {saveLanguageLocally, getLang } from '@/lib/Utils/Browser/browserUtils';
 
 const LanguageContext = createContext();
 
@@ -23,6 +23,7 @@ export function LanguageProvider({ children }) {
         setLanguage(shortLang);
         setDir(meta.dir);
         // saveLanguageLocally(shortLang);
+        
 
         const html = document.documentElement;
         html.lang = meta.locale;
@@ -41,11 +42,11 @@ export function LanguageProvider({ children }) {
         html.lang = meta.locale;
         html.dir = meta.dir;
         document.body.className = newLang;
-        // saveLanguageLocally(newLang);
+        saveLanguageLocally(newLang);
     };
 
     return (
-        <LanguageContext.Provider value={{ language, changeLanguage, dir,inverted_dir:dir=='rtl'?'ltr':'rtl', meta: LANG_META[language] }}>
+        <LanguageContext.Provider value={{language_strings:LANG_CONTENT[language], language, changeLanguage, dir,inverted_dir:dir=='rtl'?'ltr':'rtl', meta: LANG_META[language] }}>
             {children}
         </LanguageContext.Provider>
     );

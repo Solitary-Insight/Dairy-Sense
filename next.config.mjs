@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
-  trailingSlash: true, // Optional but recommended for consistency
+  // output: 'export',
+  // trailingSlash: true, // Optional but recommended for consistency
 
   ignoreDuringBuilds: true,
   images: {

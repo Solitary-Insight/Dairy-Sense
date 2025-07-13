@@ -13,10 +13,16 @@ import { Badge } from "@/components/ui/badge"
 import { Eye, EyeOff, User, Building, Phone, Mail, Lock, CreditCard, Leaf, CheckCircle } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useLanguage } from "@/hooks/useLanguage"
+import { cn } from "@/lib/Utils/utils"
 
 export default function RegisterForm() {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(1)
+
+  const { language, language_strings, meta, dir } = useLanguage()
+
+  const REGISTER_TEXTS = language_strings.register
   const [formData, setFormData] = useState({
     // Personal Information
     firstName: "",
@@ -88,7 +94,20 @@ export default function RegisterForm() {
   if (!mounted) return null
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 py-12">
+    <div
+      className={cn(
+        `min-h-screen py-12 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50`,
+        meta.class === "urdu"
+          ? "font-urdu leading-[2.25rem] tracking-[0.05em] text-right"
+          : "font-english"
+      )}
+    >
+      {/* <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">{REGISTER_TEXTS.pageTitle}</h1>
+        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          {REGISTER_TEXTS.pageSubTitles}
+        </p>
+      </div> */}
       {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
@@ -102,12 +121,16 @@ export default function RegisterForm() {
           <div className="text-center mb-12 animate-fade-in-up">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl shadow-lg mb-6 animate-bounce-gentle">
               <Leaf className="w-8 h-8 text-white" />
+
             </div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Register Your Farm</h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Join thousands of dairy farmers using AgroSense to optimize their operations
-            </p>
+            <div className="text-center mb-12">
+              <h1 className="text-4xl font-bold text-gray-900 mb-4">{REGISTER_TEXTS.pageTitle}</h1>
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                {REGISTER_TEXTS.pageSubtitle}
+              </p>
+            </div>
           </div>
+
 
           {/* Progress Steps */}
           <div className="flex justify-center mb-12 animate-fade-in-up animation-delay-200">
@@ -115,17 +138,15 @@ export default function RegisterForm() {
               {[1, 2, 3].map((step) => (
                 <div key={step} className="flex items-center">
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center font-medium transition-all duration-300 ${
-                      step <= currentStep ? "bg-green-500 text-white shadow-lg" : "bg-gray-200 text-gray-500"
-                    }`}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center font-medium transition-all duration-300 ${step <= currentStep ? "bg-green-500 text-white shadow-lg" : "bg-gray-200 text-gray-500"
+                      }`}
                   >
                     {step < currentStep ? <CheckCircle className="w-5 h-5" /> : step}
                   </div>
                   {step < 3 && (
                     <div
-                      className={`w-16 h-1 mx-2 transition-all duration-300 ${
-                        step < currentStep ? "bg-green-500" : "bg-gray-200"
-                      }`}
+                      className={`w-16 h-1 mx-2 transition-all duration-300 ${step < currentStep ? "bg-green-500" : "bg-gray-200"
+                        }`}
                     />
                   )}
                 </div>
@@ -143,14 +164,14 @@ export default function RegisterForm() {
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 text-2xl">
                         <User className="w-6 h-6 text-green-600" />
-                        Personal Information
+                        {REGISTER_TEXTS.sectionTitles.personalInfo}
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div className="grid md:grid-cols-2 gap-4">
                         <div className="animate-fade-in-up animation-delay-200">
                           <Label htmlFor="firstName" className="text-gray-700 font-medium">
-                            First Name *
+                            {REGISTER_TEXTS.labels.firstName}
                           </Label>
                           <Input
                             id="firstName"
@@ -161,13 +182,13 @@ export default function RegisterForm() {
                           />
                         </div>
                         <div className="animate-fade-in-up animation-delay-300">
-                          <Label htmlFor="lastName" className="text-gray-700 font-medium">
-                            Last Name *
+                          <Label htmlFor="lastName" className="text-gray-700  font-medium">
+                            {REGISTER_TEXTS.labels.lastName}
                           </Label>
                           <Input
                             id="lastName"
                             required
-                            className="h-12 border-gray-200 focus:border-green-500 focus:ring-green-500 transition-all duration-300"
+                            className="h-12   border-gray-200 focus:border-green-500 focus:ring-green-500 transition-all duration-300"
                             value={formData.lastName}
                             onChange={(e) => setFormData((prev) => ({ ...prev, lastName: e.target.value }))}
                           />
@@ -177,7 +198,8 @@ export default function RegisterForm() {
                       <div className="grid md:grid-cols-2 gap-4">
                         <div className="animate-fade-in-up animation-delay-400">
                           <Label htmlFor="email" className="text-gray-700 font-medium">
-                            Email Address *
+                            {REGISTER_TEXTS.labels.email}
+
                           </Label>
                           <div className="relative group">
                             <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400 group-focus-within:text-green-500 transition-colors" />
@@ -193,7 +215,7 @@ export default function RegisterForm() {
                         </div>
                         <div className="animate-fade-in-up animation-delay-500">
                           <Label htmlFor="phone" className="text-gray-700 font-medium">
-                            Phone Number *
+                            {REGISTER_TEXTS.labels.phone}
                           </Label>
                           <div className="relative group">
                             <Phone className="absolute left-3 top-3 h-5 w-5 text-gray-400 group-focus-within:text-green-500 transition-colors" />
@@ -212,7 +234,7 @@ export default function RegisterForm() {
                       <div className="grid md:grid-cols-2 gap-4">
                         <div className="animate-fade-in-up animation-delay-600">
                           <Label htmlFor="password" className="text-gray-700 font-medium">
-                            Password *
+                            {REGISTER_TEXTS.labels.password}
                           </Label>
                           <div className="relative group">
                             <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400 group-focus-within:text-green-500 transition-colors" />
@@ -235,7 +257,7 @@ export default function RegisterForm() {
                         </div>
                         <div className="animate-fade-in-up animation-delay-700">
                           <Label htmlFor="confirmPassword" className="text-gray-700 font-medium">
-                            Confirm Password *
+                            {REGISTER_TEXTS.labels.confirmPassword}
                           </Label>
                           <div className="relative group">
                             <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400 group-focus-within:text-green-500 transition-colors" />
@@ -264,7 +286,7 @@ export default function RegisterForm() {
                           onClick={nextStep}
                           className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 px-8 h-12"
                         >
-                          Next Step
+                          {REGISTER_TEXTS.buttons.next}
                         </Button>
                       </div>
                     </CardContent>
@@ -277,13 +299,13 @@ export default function RegisterForm() {
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 text-2xl">
                         <Building className="w-6 h-6 text-green-600" />
-                        Farm Information
+                        {REGISTER_TEXTS.sectionTitles.farmInfo}
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div className="animate-fade-in-up animation-delay-200">
                         <Label htmlFor="farmName" className="text-gray-700 font-medium">
-                          Farm Name *
+                          {REGISTER_TEXTS.labels.farmName}
                         </Label>
                         <Input
                           id="farmName"
@@ -296,7 +318,7 @@ export default function RegisterForm() {
 
                       <div className="animate-fade-in-up animation-delay-300">
                         <Label htmlFor="farmAddress" className="text-gray-700 font-medium">
-                          Farm Address *
+                          {REGISTER_TEXTS.labels.farmAddress}
                         </Label>
                         <Input
                           id="farmAddress"
@@ -310,7 +332,7 @@ export default function RegisterForm() {
                       <div className="grid md:grid-cols-3 gap-4">
                         <div className="animate-fade-in-up animation-delay-400">
                           <Label htmlFor="city" className="text-gray-700 font-medium">
-                            City *
+                            {REGISTER_TEXTS.labels.city}
                           </Label>
                           <Input
                             id="city"
@@ -322,7 +344,7 @@ export default function RegisterForm() {
                         </div>
                         <div className="animate-fade-in-up animation-delay-500">
                           <Label htmlFor="state" className="text-gray-700 font-medium">
-                            State/Province *
+                            {REGISTER_TEXTS.labels.state}
                           </Label>
                           <Input
                             id="state"
@@ -334,7 +356,7 @@ export default function RegisterForm() {
                         </div>
                         <div className="animate-fade-in-up animation-delay-600">
                           <Label htmlFor="postalCode" className="text-gray-700 font-medium">
-                            Postal Code
+                            {REGISTER_TEXTS.labels.postalCode}
                           </Label>
                           <Input
                             id="postalCode"
@@ -348,24 +370,21 @@ export default function RegisterForm() {
                       <div className="grid md:grid-cols-3 gap-4">
                         <div className="animate-fade-in-up animation-delay-700">
                           <Label htmlFor="cattleCount" className="text-gray-700 font-medium">
-                            Number of Cattle *
+                            {REGISTER_TEXTS.labels.cattleCount}
                           </Label>
                           <Select onValueChange={(value) => setFormData((prev) => ({ ...prev, cattleCount: value }))}>
                             <SelectTrigger className="h-12 border-gray-200 focus:border-green-500 focus:ring-green-500">
-                              <SelectValue placeholder="Select range" />
+                              <SelectValue placeholder={REGISTER_TEXTS.placeholders.cattleRange} />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="1-50">1-50 cattle</SelectItem>
-                              <SelectItem value="51-100">51-100 cattle</SelectItem>
-                              <SelectItem value="101-200">101-200 cattle</SelectItem>
-                              <SelectItem value="201-500">201-500 cattle</SelectItem>
-                              <SelectItem value="500+">500+ cattle</SelectItem>
+                              {REGISTER_TEXTS.dropdowns.cattle_counts.map((count_item) => <SelectItem value={count_item.value}>{count_item.label}</SelectItem>)}
+
                             </SelectContent>
                           </Select>
                         </div>
                         <div className="animate-fade-in-up animation-delay-800">
                           <Label htmlFor="farmSize" className="text-gray-700 font-medium">
-                            Farm Size (acres)
+                            {REGISTER_TEXTS.labels.farmSize}
                           </Label>
                           <Input
                             id="farmSize"
@@ -377,17 +396,18 @@ export default function RegisterForm() {
                         </div>
                         <div className="animate-fade-in-up animation-delay-900">
                           <Label htmlFor="farmType" className="text-gray-700 font-medium">
-                            Farm Type *
+                            {REGISTER_TEXTS.labels.farmType}
                           </Label>
                           <Select onValueChange={(value) => setFormData((prev) => ({ ...prev, farmType: value }))}>
                             <SelectTrigger className="h-12 border-gray-200 focus:border-green-500 focus:ring-green-500">
-                              <SelectValue placeholder="Select type" />
+                              <SelectValue placeholder={REGISTER_TEXTS.placeholders.farmType} />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="dairy">Dairy Farm</SelectItem>
-                              <SelectItem value="mixed">Mixed Farm</SelectItem>
-                              <SelectItem value="organic">Organic Farm</SelectItem>
-                              <SelectItem value="commercial">Commercial Farm</SelectItem>
+                              {REGISTER_TEXTS.farm_types.map((type) => {
+                                return <SelectItem value={type.value}>{type.label}</SelectItem>
+
+                              })}
+
                             </SelectContent>
                           </Select>
                         </div>
@@ -395,14 +415,15 @@ export default function RegisterForm() {
 
                       <div className="flex justify-between animate-fade-in-up animation-delay-1000">
                         <Button type="button" variant="outline" onClick={prevStep} className="px-8 h-12 bg-transparent">
-                          Previous
+                          {REGISTER_TEXTS.buttons.previous}
                         </Button>
                         <Button
                           type="button"
                           onClick={nextStep}
                           className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 px-8 h-12"
                         >
-                          Next Step
+                          {REGISTER_TEXTS.buttons.next}
+
                         </Button>
                       </div>
                     </CardContent>
@@ -411,33 +432,30 @@ export default function RegisterForm() {
 
                 {/* Step 3: Plan Selection & Terms */}
                 {currentStep === 3 && (
-                  <Card className="shadow-2xl border-0 backdrop-blur-sm bg-white/80 animate-slide-up">
+                  <Card className="shadow-2xl  border-0 backdrop-blur-sm bg-white/80 animate-slide-up">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 text-2xl">
                         <CreditCard className="w-6 h-6 text-green-600" />
-                        Choose Your Plan
+                        {REGISTER_TEXTS.sectionTitles.planSelection}
+
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-6">
+                    <CardContent className="space-y-6   px-4">
                       <div className="grid md:grid-cols-3 gap-4">
-                        {[
-                          { id: "basic", name: "Basic", price: "$49/month", desc: "Up to 50 cattle" },
-                          { id: "pro", name: "Pro", price: "$99/month", desc: "Up to 200 cattle", popular: true },
-                          { id: "enterprise", name: "Enterprise", price: "Custom", desc: "Unlimited cattle" },
-                        ].map((plan, index) => (
+                        {REGISTER_TEXTS.plan_types.map((plan, index) => (
                           <div
                             key={plan.id}
-                            className={`relative border rounded-xl p-6 cursor-pointer transition-all duration-300 animate-fade-in-up ${
-                              formData.planType === plan.id
-                                ? "border-green-500 bg-green-50 shadow-lg scale-105"
-                                : "border-gray-200 hover:border-gray-300 hover:shadow-md"
-                            }`}
+                            className={`relative border rounded-xl p-6 cursor-pointer transition-all duration-300 animate-fade-in-up ${formData.planType === plan.id
+                              ? "border-green-500 bg-green-50 shadow-lg scale-105"
+                              : "border-gray-200 hover:border-gray-300 hover:shadow-md"
+                              }`}
                             style={{ animationDelay: `${200 + index * 100}ms` }}
                             onClick={() => setFormData((prev) => ({ ...prev, planType: plan.id }))}
                           >
-                            {plan.popular && (
+                            {plan.popular_label && (
                               <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-500 hover:bg-green-500">
-                                Popular
+                                {plan.popular_label}
+
                               </Badge>
                             )}
                             <div className="text-center">
@@ -459,7 +477,7 @@ export default function RegisterForm() {
                             }
                           />
                           <Label htmlFor="requestDemo" className="text-sm text-gray-700">
-                            Request a personalized demo after registration
+                            {REGISTER_TEXTS.options.requestDemo}
                           </Label>
                         </div>
 
@@ -472,7 +490,7 @@ export default function RegisterForm() {
                             }
                           />
                           <Label htmlFor="installmentInterest" className="text-sm text-gray-700">
-                            I'm interested in installment payment options
+                            {REGISTER_TEXTS.options.installmentInterest}
                           </Label>
                         </div>
                       </div>
@@ -488,13 +506,13 @@ export default function RegisterForm() {
                             }
                           />
                           <Label htmlFor="agreeTerms" className="text-sm leading-relaxed text-gray-700">
-                            I agree to the{" "}
+                            {REGISTER_TEXTS.legal.agreeTerms}{" "}
                             <Link href="/terms" className="text-green-600 hover:text-green-700 underline">
-                              Terms of Service
+                              {REGISTER_TEXTS.legal.terms}
                             </Link>{" "}
-                            and{" "}
+                            {REGISTER_TEXTS.legal.and}{" "}
                             <Link href="/privacy" className="text-green-600 hover:text-green-700 underline">
-                              Privacy Policy
+                              {REGISTER_TEXTS.legal.privacy}
                             </Link>
                             *
                           </Label>
@@ -509,14 +527,14 @@ export default function RegisterForm() {
                             }
                           />
                           <Label htmlFor="agreeMarketing" className="text-sm leading-relaxed text-gray-700">
-                            I would like to receive updates about new features, tips, and special offers from AgroSense
+                            {REGISTER_TEXTS.legal.agreeMarketing}
                           </Label>
                         </div>
                       </div>
 
                       <div className="flex justify-between animate-fade-in-up animation-delay-1000">
                         <Button type="button" variant="outline" onClick={prevStep} className="px-8 h-12 bg-transparent">
-                          Previous
+                          {REGISTER_TEXTS.buttons.previous}
                         </Button>
                         <Button
                           type="submit"
@@ -526,10 +544,10 @@ export default function RegisterForm() {
                           {isSubmitting ? (
                             <div className="flex items-center gap-2">
                               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                              Creating Account...
+                              {REGISTER_TEXTS.buttons.submitting}
                             </div>
                           ) : (
-                            "Create Account & Start Trial"
+                            REGISTER_TEXTS.buttons.submit
                           )}
                         </Button>
                       </div>
@@ -542,17 +560,11 @@ export default function RegisterForm() {
               <div className="space-y-6 animate-fade-in-up animation-delay-400">
                 <Card className="shadow-xl border-0 backdrop-blur-sm bg-white/80">
                   <CardHeader>
-                    <CardTitle className="text-lg">Why Choose AgroSense?</CardTitle>
+                    <CardTitle className="text-lg"> {REGISTER_TEXTS.sidebar.whyChoose}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="space-y-3">
-                      {[
-                        "30-day free trial",
-                        "No setup fees",
-                        "24/7 customer support",
-                        "Cancel anytime",
-                        "Data export available",
-                      ].map((benefit, index) => (
+                      {REGISTER_TEXTS.sidebar.benefits.map((benefit, index) => (
                         <div
                           key={benefit}
                           className="flex items-center gap-3 text-sm animate-fade-in-up"
@@ -568,19 +580,19 @@ export default function RegisterForm() {
 
                 <Card className="shadow-xl border-0 backdrop-blur-sm bg-white/80">
                   <CardHeader>
-                    <CardTitle className="text-lg">Need Help?</CardTitle>
+                    <CardTitle className="text-lg"> {REGISTER_TEXTS.sidebar.needHelp}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <div className="text-sm text-gray-600">
-                      <p>Already have an account?</p>
+                      <p> {REGISTER_TEXTS.sidebar.alreadyAccount}</p>
                       <Link href="/login" className="text-green-600 hover:text-green-700 font-medium transition-colors">
-                        Sign in here
+                        {REGISTER_TEXTS.sidebar.signIn}
                       </Link>
                     </div>
                     <div className="text-sm text-gray-600">
-                      <p>Questions about our plans?</p>
+                      <p> {REGISTER_TEXTS.sidebar.askPlans}</p>
                       <Link href="/demo" className="text-green-600 hover:text-green-700 font-medium transition-colors">
-                        Request a demo
+                        {REGISTER_TEXTS.sidebar.request_demo}
                       </Link>
                     </div>
                   </CardContent>

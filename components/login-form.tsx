@@ -11,8 +11,17 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Eye, EyeOff, Lock, Mail, Leaf } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useLanguage } from "@/hooks/useLanguage"
+import { LANG_CONTENT } from "@/lib/Constants/App/language"
+import { cn } from "@/lib/Utils/utils"
 
 export default function LoginForm() {
+  const { language, dir, meta, language_strings } = useLanguage()
+
+
+  const LOGIN_TEXTS = language_strings['login']['form']
+
+
   const router = useRouter()
   const [formData, setFormData] = useState({
     email: "",
@@ -42,7 +51,17 @@ export default function LoginForm() {
   if (!mounted) return null
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4">
+   
+    <div
+      className={cn(
+            `rounded-3xl bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4`,
+            meta.class === "urdu"
+              ? "font-urdu leading-[2.25rem] tracking-[0.05em] text-right"
+              : "font-english"
+          )}
+     
+     
+     >
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
@@ -52,48 +71,53 @@ export default function LoginForm() {
 
       <div className="relative w-full max-w-md">
         {/* Logo Animation */}
-        <div className="text-center mb-8 animate-fade-in-up">
+        <div className="text-center mt-1 animate-fade-in-up">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl shadow-lg mb-4 animate-bounce-gentle">
             <Leaf className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
-          <p className="text-gray-600">Sign in to your farm dashboard</p>
+          <div className="my-2">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">{LOGIN_TEXTS.login_heading}</h1>
+            <p className="text-gray-600">{LOGIN_TEXTS.login_subheading}</p>
+          </div>
         </div>
 
-        <Card className="shadow-2xl border-0 backdrop-blur-sm bg-white/80 animate-slide-up">
+        <Card dir={dir} className="shadow-2xl border-0 backdrop-blur-sm bg-white/80 animate-slide-up">
+
           <CardHeader className="space-y-1 pb-8">
-            <CardTitle className="text-2xl text-center text-gray-900">Sign In</CardTitle>
+            <CardTitle className="text-2xl text-center text-gray-900">{LOGIN_TEXTS.login_form_heading}</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2 animate-fade-in-up animation-delay-200">
                 <Label htmlFor="email" className="text-gray-700 font-medium">
-                  Email Address
+                  {LOGIN_TEXTS.login_email_label}
                 </Label>
                 <div className="relative group">
                   <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400 group-focus-within:text-green-500 transition-colors" />
+
                   <Input
                     id="email"
                     type="email"
-                    placeholder="Enter your email"
+                    placeholder={LOGIN_TEXTS.login_email_placeholder}
                     className="pl-11 h-12 border-gray-200 focus:border-green-500 focus:ring-green-500 transition-all duration-300"
                     required
                     value={formData.email}
                     onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
                   />
+
                 </div>
               </div>
 
               <div className="space-y-2 animate-fade-in-up animation-delay-400">
                 <Label htmlFor="password" className="text-gray-700 font-medium">
-                  Password
+                  {LOGIN_TEXTS.login_password_label}
                 </Label>
                 <div className="relative group">
                   <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400 group-focus-within:text-green-500 transition-colors" />
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Enter your password"
+                    placeholder={LOGIN_TEXTS.login_password_placeholder}
                     className="pl-11 pr-11 h-12 border-gray-200 focus:border-green-500 focus:ring-green-500 transition-all duration-300"
                     required
                     value={formData.password}
@@ -117,11 +141,11 @@ export default function LoginForm() {
                     onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, rememberMe: checked as boolean }))}
                   />
                   <Label htmlFor="rememberMe" className="text-sm text-gray-600">
-                    Remember me
+                    {LOGIN_TEXTS.login_remeber_me_checkbox_label}
                   </Label>
                 </div>
                 <Link href="/forgot-password" className="text-sm text-green-600 hover:text-green-700 transition-colors">
-                  Forgot password?
+                  {LOGIN_TEXTS.login_forget_password_label}
                 </Link>
               </div>
 
@@ -136,30 +160,30 @@ export default function LoginForm() {
                     Signing in...
                   </div>
                 ) : (
-                  "Sign In"
+                  LOGIN_TEXTS.login_button_label
                 )}
               </Button>
             </form>
 
             <div className="mt-8 text-center animate-fade-in-up animation-delay-1000">
               <p className="text-sm text-gray-600">
-                Don't have an account?{" "}
+                {LOGIN_TEXTS.login_no_accout_text}{" "}
                 <Link href="/register" className="text-green-600 hover:text-green-700 font-medium transition-colors">
-                  Register your farm
+                  {LOGIN_TEXTS.login_no_accout_text_navigation}
                 </Link>
               </p>
             </div>
 
             <div className="mt-6 pt-6 border-t border-gray-200 animate-fade-in-up animation-delay-1200">
               <div className="text-center">
-                <p className="text-xs text-gray-500 mb-3">Need help?</p>
+                <p className="text-xs text-gray-500 mb-3">{LOGIN_TEXTS.login_need_help_text}</p>
                 <div className="flex justify-center space-x-4 text-xs">
                   <Link href="/support" className="text-green-600 hover:text-green-700 transition-colors">
-                    Contact Support
+                    {LOGIN_TEXTS.login_contact_support}
                   </Link>
                   <span className="text-gray-300">|</span>
                   <Link href="/demo" className="text-green-600 hover:text-green-700 transition-colors">
-                    Request Demo
+                    {LOGIN_TEXTS.login_request_demo}
                   </Link>
                 </div>
               </div>

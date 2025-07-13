@@ -34,6 +34,12 @@ const config: Config = {
       },
     },
     extend: {
+      lineHeight: {
+        urdu: '2.25rem', // Custom relaxed line height for Nastaliq
+      },
+      letterSpacing: {
+        urdu: '0.05em', // Slightly wider letter spacing for Urdu readability
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

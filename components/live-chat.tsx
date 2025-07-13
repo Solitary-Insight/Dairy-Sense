@@ -10,8 +10,8 @@ import { LANG_CONTENT, LANG_META } from "@/lib/Constants/App/language"
 export default function LiveChat() {
   const [isOpen, setIsOpen] = useState(false)
   const [message, setMessage] = useState("")
-  const { language, meta, dir } = useLanguage()
-  const CHAT_TEXT = LANG_CONTENT[language].chat;
+  const { language, meta, dir,language_strings } = useLanguage()
+  const CHAT_TEXT = language_strings.chat;
   return (
     <>
       {/* Chat Widget */}

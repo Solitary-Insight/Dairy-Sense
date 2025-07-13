@@ -12,11 +12,11 @@ import {
 } from "lucide-react"
 
 export default function Footer() {
-  const { language, dir } = useLanguage()
+  const { language, dir,meta } = useLanguage()
   const FOOTER_TEXTS = LANG_CONTENT[language].footer
 
   return (
-    <footer dir={LANG_META[language].dir} className="bg-gray-900 text-white">
+    <footer dir={LANG_META[language].dir} className={`bg-gray-900 text-white font-${meta.class}`}>
       <div className="container mx-auto px-4 py-16">
         <div className="grid md:grid-cols-4 gap-8">
           {/* Company Info */}

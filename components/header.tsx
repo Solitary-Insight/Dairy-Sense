@@ -1,19 +1,25 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Menu, X, Globe } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useLanguage } from "@/hooks/useLanguage"
 import { LANG_CONTENT, LANG_META } from "@/lib/Constants/App/language"
+import { getLang } from "@/lib/Utils/Browser/browserUtils"
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { language, changeLanguage, dir, meta,inverted_dir } = useLanguage();
   const HEADER_LABELS = LANG_CONTENT[language].nav
 
+  useEffect(()=>{
+    const SAVED_LANG=getLang()
+    console.log("SAVED_LANG : ",SAVED_LANG)
+  })
+
   return (
-    <header dir={inverted_dir} className={`bg-white/95 backdrop-blur-sm border-b border-green-100 sticky top-0 z-50  `}>
+    <header dir={inverted_dir} className={`bg-white/95 backdrop-blur-sm border-b border-green-100 sticky top-0 z-50 font-${meta.class} `}>
 
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between flex-row-reverse" >
