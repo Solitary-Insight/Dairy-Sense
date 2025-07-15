@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { useLanguage } from "@/hooks/useLanguage"
-import { LANG_CONTENT, LANG_META } from "@/lib/Constants/App/language"
+import { LANG_STRINGS, LANG_META } from "@/lib/Constants/App/language"
 import { Thermometer, MapPin, Activity, Zap } from "lucide-react"
 
 const sensorFeatures = [
@@ -21,7 +21,7 @@ const sensorFeatures = [
 
 export default function SensorSystemSection() {
   const { language, dir, meta } = useLanguage()
-  const SENSORY_TEXT = LANG_CONTENT[language].technology
+  const SENSORY_TEXT = LANG_STRINGS[language].technology
   return (
     <section className="py-20 bg-gradient-to-br from-green-50 to-emerald-50">
       <div className="container mx-auto px-4">

@@ -15,6 +15,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useLanguage } from "@/hooks/useLanguage"
 import { cn } from "@/lib/Utils/utils"
+import { getLangResposiveClasses } from "@/lib/Utils/Browser/browserUtils"
 
 export default function RegisterForm() {
   const router = useRouter()
@@ -97,9 +98,7 @@ export default function RegisterForm() {
     <div
       className={cn(
         `min-h-screen py-12 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50`,
-        meta.class === "urdu"
-          ? "font-urdu leading-[2.25rem] tracking-[0.05em] text-right"
-          : "font-english"
+        getLangResposiveClasses(meta)
       )}
     >
       {/* <div className="text-center mb-12">
@@ -432,7 +431,7 @@ export default function RegisterForm() {
 
                 {/* Step 3: Plan Selection & Terms */}
                 {currentStep === 3 && (
-                  <Card className="shadow-2xl  border-0 backdrop-blur-sm bg-white/80 animate-slide-up">
+                  <Card  className="shadow-2xl  border-0 backdrop-blur-sm bg-white/80 animate-slide-up">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 text-2xl">
                         <CreditCard className="w-6 h-6 text-green-600" />
@@ -440,7 +439,7 @@ export default function RegisterForm() {
 
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-6   px-4">
+                    <CardContent  className="space-y-6   px-4">
                       <div className="grid md:grid-cols-3 gap-4">
                         {REGISTER_TEXTS.plan_types.map((plan, index) => (
                           <div

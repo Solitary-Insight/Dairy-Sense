@@ -3,12 +3,12 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Check, Star } from "lucide-react"
 import { useLanguage } from "@/hooks/useLanguage"
-import { LANG_CONTENT, LANG_META } from "@/lib/Constants/App/language"
+import { LANG_STRINGS, LANG_META } from "@/lib/Constants/App/language"
 
 
 export default function PricingSection() {
   const { dir, meta, language } = useLanguage()
-  const PRICING_TEXTS = LANG_CONTENT[language].pricing;
+  const PRICING_TEXTS = LANG_STRINGS[language].pricing;
   return (
     <section dir={LANG_META[language].dir} id="pricing" className="py-20 bg-white">
       <div className="container mx-auto px-4">

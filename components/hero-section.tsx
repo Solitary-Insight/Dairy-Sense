@@ -2,13 +2,13 @@ import { Button } from "@/components/ui/button"
 import { ArrowRight, Play } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useLanguage } from "@/hooks/useLanguage"
-import { LANG_CONTENT, LANG_META } from "@/lib/Constants/App/language"
+import { LANG_STRINGS, LANG_META } from "@/lib/Constants/App/language"
 
 export default function HeroSection() {
   const { language, meta, dir } = useLanguage()
-  const HERO_TEXTS = LANG_CONTENT[language].hero
+  const HERO_TEXTS = LANG_STRINGS[language].hero
   return (
-    <section  className={`font-${LANG_CONTENT[language].class}`} dir={LANG_META[language].dir}>
+    <section  className={`font-${LANG_STRINGS[language].class}`} dir={LANG_META[language].dir}>
       <section
         id="home"
         className="relative bg-gradient-to-br from-green-50 to-emerald-50 py-20 lg:py-32 overflow-hidden"

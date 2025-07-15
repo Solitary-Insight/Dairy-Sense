@@ -5,7 +5,7 @@ import { MessageCircle, X, Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useLanguage } from "@/hooks/useLanguage"
-import { LANG_CONTENT, LANG_META } from "@/lib/Constants/App/language"
+import { LANG_STRINGS, LANG_META } from "@/lib/Constants/App/language"
 
 export default function LiveChat() {
   const [isOpen, setIsOpen] = useState(false)

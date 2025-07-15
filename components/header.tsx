@@ -5,17 +5,19 @@ import { Button } from "@/components/ui/button"
 import { Menu, X, Globe } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useLanguage } from "@/hooks/useLanguage"
-import { LANG_CONTENT, LANG_META } from "@/lib/Constants/App/language"
+import { LANG_STRINGS, LANG_META } from "@/lib/Constants/App/language"
 import { getLang } from "@/lib/Utils/Browser/browserUtils"
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { language, changeLanguage, dir, meta,inverted_dir } = useLanguage();
-  const HEADER_LABELS = LANG_CONTENT[language].nav
+
+  const HEADER_LABELS = LANG_STRINGS[language].nav
 
   useEffect(()=>{
     const SAVED_LANG=getLang()
     console.log("SAVED_LANG : ",SAVED_LANG)
+    
   })
 
   return (

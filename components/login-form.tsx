@@ -12,7 +12,7 @@ import { Eye, EyeOff, Lock, Mail, Leaf } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useLanguage } from "@/hooks/useLanguage"
-import { LANG_CONTENT } from "@/lib/Constants/App/language"
+import { LANG_STRINGS } from "@/lib/Constants/App/language"
 import { cn } from "@/lib/Utils/utils"
 
 export default function LoginForm() {
@@ -55,9 +55,9 @@ export default function LoginForm() {
     <div
       className={cn(
             `rounded-3xl bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4`,
-            meta.class === "urdu"
-              ? "font-urdu leading-[2.25rem] tracking-[0.05em] text-right"
-              : "font-english"
+            meta.dir === "rtl"
+              ? `font-${language} leading-[2.25rem] tracking-[0.05em] text-right`
+              : `font-${language}`
           )}
      
      

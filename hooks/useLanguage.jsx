@@ -3,7 +3,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { LANG_CONTENT, LANG_META } from "../lib/Constants/App/language";
+import { LANG_STRINGS, LANG_META } from "../lib/Constants/App/language";
 import { LANG_LOG_KEY } from "@/lib/Constants/Debugging/LogKeys";
 import {saveLanguageLocally, getLang } from '@/lib/Utils/Browser/browserUtils';
 
@@ -46,7 +46,7 @@ export function LanguageProvider({ children }) {
     };
 
     return (
-        <LanguageContext.Provider value={{language_strings:LANG_CONTENT[language], language, changeLanguage, dir,inverted_dir:dir=='rtl'?'ltr':'rtl', meta: LANG_META[language] }}>
+        <LanguageContext.Provider value={{language_strings:LANG_STRINGS[language], language, changeLanguage, dir,inverted_dir:dir=='rtl'?'ltr':'rtl', meta: LANG_META[language] }}>
             {children}
         </LanguageContext.Provider>
     );

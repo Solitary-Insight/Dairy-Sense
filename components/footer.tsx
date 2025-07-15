@@ -1,6 +1,6 @@
 'use client'
 import { useLanguage } from "@/hooks/useLanguage"
-import { LANG_CONTENT, LANG_META } from "@/lib/Constants/App/language"
+import { LANG_STRINGS, LANG_META } from "@/lib/Constants/App/language"
 import {
   Facebook,
   Twitter,
@@ -13,7 +13,7 @@ import {
 
 export default function Footer() {
   const { language, dir,meta } = useLanguage()
-  const FOOTER_TEXTS = LANG_CONTENT[language].footer
+  const FOOTER_TEXTS = LANG_STRINGS[language].footer
 
   return (
     <footer dir={LANG_META[language].dir} className={`bg-gray-900 text-white font-${meta.class}`}>

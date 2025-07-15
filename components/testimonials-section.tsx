@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { useLanguage } from "@/hooks/useLanguage"
-import { LANG_CONTENT, LANG_META } from "@/lib/Constants/App/language"
+import { LANG_STRINGS, LANG_META } from "@/lib/Constants/App/language"
 import { Star, Quote } from "lucide-react"
 
 const testimonials = [
@@ -24,7 +24,7 @@ const testimonials = [
 export default function TestimonialsSection() {
 
   const { dir, language, meta } = useLanguage()
-  const TESTIMONIALS = LANG_CONTENT[language].testimonials
+  const TESTIMONIALS = LANG_STRINGS[language].testimonials
   return (
     <section className="py-20 bg-gradient-to-br from-green-50 to-emerald-50">
       <div className="container mx-auto px-4">

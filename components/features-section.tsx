@@ -1,12 +1,12 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { useLanguage } from "@/hooks/useLanguage"
-import { LANG_CONTENT, LANG_META } from "@/lib/Constants/App/language"
+import { LANG_STRINGS, LANG_META } from "@/lib/Constants/App/language"
 import { Heart, Milk, Users, Truck, BarChart3, ShoppingCart, Activity, MapPin } from "lucide-react"
 
 
 export default function FeaturesSection() {
   const { language, dir, meta } = useLanguage()
-  const FEATURES_TEXT = LANG_CONTENT[language].features
+  const FEATURES_TEXT = LANG_STRINGS[language].features
 
   return (
     <section id="features" className="py-20 bg-white">

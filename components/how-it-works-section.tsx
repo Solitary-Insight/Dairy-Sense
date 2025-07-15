@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { useLanguage } from "@/hooks/useLanguage"
-import { LANG_CONTENT } from "@/lib/Constants/App/language"
+import { LANG_STRINGS } from "@/lib/Constants/App/language"
 import { ArrowRight,} from "lucide-react"
 
 
@@ -8,7 +8,7 @@ import { ArrowRight,} from "lucide-react"
 export default function HowItWorksSection() {
 
   const {language,meta,dir} =useLanguage()
-  const PROCEDURE_TEXT=LANG_CONTENT[language].how_it_works
+  const PROCEDURE_TEXT=LANG_STRINGS[language].how_it_works
   return (
     <section className="py-20 bg-white">
       <div className="container mx-auto px-4">
