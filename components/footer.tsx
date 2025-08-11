@@ -12,19 +12,22 @@ import {
 } from "lucide-react"
 
 export default function Footer() {
-  const { language, dir,meta } = useLanguage()
+  const { language, dir, meta } = useLanguage()
+
   const FOOTER_TEXTS = LANG_STRINGS[language].footer
 
   return (
-    <footer dir={LANG_META[language].dir} className={`bg-gray-900 text-white font-${meta.class}`}>
+    <footer dir={dir} className={`bg-gray-900 text-white font-${meta.class}`}>
       <div className="container mx-auto px-4 py-16">
         <div className="grid md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">A</span>
-              </div>
+              <img
+                src="/images/dairy_sense_logo_only.png"
+                alt="Smart Collar Logo"
+                className="w-12 h-12 object-contain rounded-full shadow-md border border-gray-300 p-2 bg-white"
+              />
               <span className="text-2xl font-bold">{FOOTER_TEXTS.company_name}</span>
             </div>
             <p className="text-gray-400 leading-relaxed">{FOOTER_TEXTS.tagline}</p>

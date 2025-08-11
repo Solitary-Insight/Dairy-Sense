@@ -12,14 +12,30 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Eye, EyeOff, User, Building, Phone, Mail, Lock, CreditCard, Leaf, CheckCircle } from "lucide-react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useLanguage } from "@/hooks/useLanguage"
 import { cn } from "@/lib/Utils/utils"
 import { getLangResposiveClasses } from "@/lib/Utils/Browser/browserUtils"
+import { OwnController } from '@/app/register/controller/Owner.Controller.js'
+import MessageBox from "./ui/messageBox"
+import OTPVerification from "./otp-verification"
+import { validateUserFromCookies } from "@/app/register/controller/CookiesValidator"
+import { ReadAndDeleteFromLocalStorage, SaveInLocalStorage } from '@/lib/Utils/Storage/LocalStorageHandler.js'
+import { navigateUserBasedOnCookie } from '@/lib/Utils/Navigation/AuthBasedNavigation.js'
+import { FARM_SAVE_KEY, FLAG_COMPLETE_PENDING_REGISTARTION, FLAG_TO_OVERRIDE_FARM_API_CALL } from "@/lib/Constants/App/Keys"
+import { TAG_OVERRIDE } from "@/lib/Constants/App/Tages"
+import { DairySense } from "@/lib/Constants/App/DairySenseData/DairySense"
+import { FarmController } from '@/app/register/controller/Farm.Controller'
 
 export default function RegisterForm() {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(1)
+  const [message, setMessage] = useState({ message: null, type: null, collapsable: true })
+  const [pendingFarmRegId, SetPendingFarmRegId] = useState(null)
+
+  const owner_controller = new OwnController()
+  const farm_controller = new FarmController()
+
 
   const { language, language_strings, meta, dir } = useLanguage()
 
@@ -32,6 +48,7 @@ export default function RegisterForm() {
     phone: "",
     password: "",
     confirmPassword: "",
+    otp_verified: false,
 
     // Farm Information
     farmName: "",
@@ -57,30 +74,195 @@ export default function RegisterForm() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [otpVerificationTimer, setOtpVerificationTimer] = useState(null)
+  const search_params = useSearchParams()
+  const farm_key = search_params?.get("farm_key")
+
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
 
-    if (formData.password !== formData.confirmPassword) {
-      // Show error snackbar (we'll implement this)
-      return
+  // INFO:  Handle Redirects
+
+  function handleRedirect(farms) {
+    const FLAG_TO_OVERRIDE = ReadAndDeleteFromLocalStorage({ key: FLAG_TO_OVERRIDE_FARM_API_CALL })
+
+    if (farm_key) {
+      console.log(" FARM TO UPDATE : ", farm_key)
+      SetPendingFarmRegId(farm_key)
+      setCurrentStep(3)
+    } else {
+      if (FLAG_TO_OVERRIDE == TAG_OVERRIDE) {
+        setCurrentStep(2)
+      }
+      if (FLAG_TO_OVERRIDE == null) {
+        SaveInLocalStorage({ data: JSON.stringify(farms), key: FARM_SAVE_KEY })
+
+        router.push('/farm-selection')
+      }
     }
-
-    setIsSubmitting(true)
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 3000))
-
-    setIsSubmitting(false)
-    // Redirect to pending setup page
-    router.push("/setup-pending")
+    // console.log("FARM KEY ", farm_key); // "ks
+    // const farm_from_localstorage=ReadAndDeleteFromLocalStorage(FLAG_COMPLETE_PENDING_REGISTARTION)
   }
 
-  const nextStep = () => {
+  //INFO: Check and validate auth-token 
+  useEffect(() => {
+
+
+
+    // INFO: Request server to validate existing user--------------
+    validateUserFromCookies({
+      onValidationSuccess: (res) => {
+
+        // -------------Result -----------------
+        console.log("[AUTH RESPONSE]: ", res.data)
+        const user = res.data.user
+        const registered_farms = res.data.registered_farms
+        const fields = { user, registered_farms }
+
+        navigateUserBasedOnCookie(
+          {
+            fields,
+            onUserWithNoOTPVerification: () => { setOtpVerificationTimer(res.data.user.createTime) },
+            // TODO: Call FUNCTION TO SAVE LOCALLY;
+            onUserWithFarmsFound: (farms) => {
+              console.log('farms', JSON.stringify(farms, null, 2)),
+
+                handleRedirect(farms)
+
+            },
+            onUserWithNoFarmFound: () => { setCurrentStep(2) },
+            onUserWithOTPVerification: (user) => {
+              setCurrentStep(2)
+            }
+          }
+        )
+      }
+    })
+
+
+
+  }, [])
+
+
+
+
+  // INFO: COSE MESSAGE BOX IN COMPONENT 
+  function closeMessage() {
+    setMessage({ message: null, type: null, collapsable: true })
+
+  }
+
+  // INFO: SHOW MESSAGE BOX IN COMPONENT 
+  function showMessage(message, type = "INFO", auto_close = true, collapsable = true) {
+    setMessage({ message, type, collapsable: collapsable })
+    if (!auto_close) return
+    setTimeout(() => {
+      closeMessage()
+    }, 3000)
+
+  }
+
+
+
+  // INFO: COMPLETE FARM REGISTRATION SAVE PLAN DETAILS ----------------------
+  async function SavePlanInfo(e) {
+    e.preventDefault()
+    const { planType, requestDemo, installmentInterest, agreeTerms, agreeMarketing } = formData
+    const payload = {
+      planType, requestDemo, installmentInterest, agreeTerms, agreeMarketing, farmId: pendingFarmRegId,
+      onResponse: (message_string_path, type) => { showMessage(message_string_path, type); setIsSubmitting(false) },
+      onSuccess: () => {
+        setIsSubmitting(false)
+        showMessage(['normal_msg', "FARM_PLAN_INFO_SUCCESS_MESSAGE", 'message'], "SUCCESS")
+        setTimeout(() => {
+          router.push("farm-selection")
+        }, 3000)
+      }
+    }
+    showMessage(['normal_msg', "FARM_PLAN_INFO_WAITING_MESSAGE", 'message'], "BLANK")
+    setIsSubmitting(true)
+    await farm_controller.completeFarmRegistration(payload)
+
+    return;
+
+
+  }
+  // -------------------------------------------------------------
+  // *************************************************************
+
+
+  // INFO : SAVE OWNER INFORMATION*********************
+  async function saveOwnerInfo() {
+    const { firstName, lastName, email, phone, password, confirmPassword } = formData
+    const payload = {
+      firstName, lastName, email, phone, password, confirmPassword,
+      onResponse: (message_string_path, type) => showMessage(message_string_path, type),
+      onSuccess: ({ uid, otpSendTime }) => {
+        setTimeout(() => {
+          // setCurrentStep(currentStep + 1)
+          // console.log('', otpSendTime,uid)
+          setOtpVerificationTimer(otpSendTime)
+        }, 3000)
+        showMessage(['normal_msg', "ACCOUNT_CREATED", 'message'], "SUCCESS")
+      }
+    }
+    showMessage(['normal_msg', "WAIT_REGISTRATION", 'message'], "BLANK", false)
+    await owner_controller.register(payload)
+    return;
+  }
+  // ********************SAVE OWNER INFORMATION*********************
+
+
+  // TODO:SAVE FARM INFORMATION*********************
+  async function saveFarmInfo() {
+
+    const {
+      farmName, farmAddress, city, state, postalCode, cattleCount, farmSize, farmType, } = formData
+    const payload = {
+      farmName, farmAddress, city, state, postalCode, cattleCount, farmSize, farmType,
+      onResponse: (message_string_path, type) => showMessage(message_string_path, type),
+      onSuccess: ({ farmId }) => {
+        setTimeout(() => {
+          // TODO: FARM REGISTRATION STAGE ONE COMPLETE
+          closeMessage()
+          SetPendingFarmRegId(farmId)
+          setCurrentStep(3)
+        }, 3000)
+
+        showMessage(['normal_msg', "FARM_REGISTERED", 'message'], "SUCCESS")
+      }
+
+      //  # :CONTROLLER PARAMS farmName,farmAddress,city,state,postalCode,cattleCount,farmSize,farmType,onResponse(msg,type),onSuccess({farmId})
+
+    }
+    // showMessage(['normal_msg', "FARM_REGISTRATION_WAITING_MESSAGE", 'message'], "BLANK", false)
+    await farm_controller.saveFarmBasicInfo(payload)
+    return;
+  }
+
+  // ********************SAVE FARM INFORMATION*********************
+
+
+
+
+
+
+  const nextStep = async () => {
+
+    if (currentStep == 1) {
+      await saveOwnerInfo()
+      return;
+    }
+    if (currentStep == 2) {
+      await saveFarmInfo()
+      return;
+    }
+
+
+
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1)
     }
@@ -93,14 +275,18 @@ export default function RegisterForm() {
   }
 
   if (!mounted) return null
+  if (otpVerificationTimer != null) return <OTPVerification createTime={otpVerificationTimer} onOtpValidation={() => { setCurrentStep(2); setOtpVerificationTimer(null) }}></OTPVerification>
 
   return (
+
     <div
       className={cn(
         `min-h-screen py-12 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50`,
         getLangResposiveClasses(meta)
       )}
     >
+
+
       {/* <div className="text-center mb-12">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">{REGISTER_TEXTS.pageTitle}</h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -108,11 +294,6 @@ export default function RegisterForm() {
         </p>
       </div> */}
       {/* Animated Background */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-emerald-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-40 left-40 w-80 h-80 bg-teal-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
-      </div>
 
       <div className="container mx-auto px-4 relative">
         <div className="max-w-4xl mx-auto">
@@ -153,7 +334,10 @@ export default function RegisterForm() {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit}>
+
+
+
+          <form onSubmit={() => { console.log("YET TO BE IMPLEMENTED") }}>
             <div className="grid lg:grid-cols-3 gap-8">
               {/* Main Form */}
               <div className="lg:col-span-2">
@@ -268,20 +452,24 @@ export default function RegisterForm() {
                               value={formData.confirmPassword}
                               onChange={(e) => setFormData((prev) => ({ ...prev, confirmPassword: e.target.value }))}
                             />
-                            <button
+                            {message.message != null && <button
                               type="button"
+
                               className="absolute right-3 top-3 h-5 w-5 text-gray-400 hover:text-green-600 transition-colors"
                               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                             >
                               {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                            </button>
+                            </button>}
                           </div>
                         </div>
                       </div>
+                      <MessageBox message={message} closeMessage={closeMessage} />
+
 
                       <div className="flex justify-end animate-fade-in-up animation-delay-800">
                         <Button
                           type="button"
+                          disabled={(message.message != null && message.type != null)}
                           onClick={nextStep}
                           className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 px-8 h-12"
                         >
@@ -376,8 +564,10 @@ export default function RegisterForm() {
                               <SelectValue placeholder={REGISTER_TEXTS.placeholders.cattleRange} />
                             </SelectTrigger>
                             <SelectContent>
-                              {REGISTER_TEXTS.dropdowns.cattle_counts.map((count_item) => <SelectItem value={count_item.value}>{count_item.label}</SelectItem>)}
+                              {new DairySense(language).getCattleCountDropDown().map(({ key, value }) =>
+                                <SelectItem value={key}>{value}</SelectItem>
 
+                              )}
                             </SelectContent>
                           </Select>
                         </div>
@@ -390,7 +580,11 @@ export default function RegisterForm() {
                             type="number"
                             className="h-12 border-gray-200 focus:border-green-500 focus:ring-green-500 transition-all duration-300"
                             value={formData.farmSize}
-                            onChange={(e) => setFormData((prev) => ({ ...prev, farmSize: e.target.value }))}
+                            onChange={(e) => {
+                              if (Number(e.target.value) >= 0) {
+                                setFormData((prev) => ({ ...prev, farmSize: e.target.value }))
+                              }
+                            }}
                           />
                         </div>
                         <div className="animate-fade-in-up animation-delay-900">
@@ -402,20 +596,22 @@ export default function RegisterForm() {
                               <SelectValue placeholder={REGISTER_TEXTS.placeholders.farmType} />
                             </SelectTrigger>
                             <SelectContent>
-                              {REGISTER_TEXTS.farm_types.map((type) => {
-                                return <SelectItem value={type.value}>{type.label}</SelectItem>
+                              {new DairySense(language).getFarmTypeDropDown().map(({ key, value }) =>
+                                <SelectItem value={key}>{value}</SelectItem>
 
-                              })}
+                              )}
 
                             </SelectContent>
                           </Select>
                         </div>
                       </div>
+                      <MessageBox message={message} closeMessage={closeMessage} />
 
                       <div className="flex justify-between animate-fade-in-up animation-delay-1000">
-                        <Button type="button" variant="outline" onClick={prevStep} className="px-8 h-12 bg-transparent">
+                        {/* <Button type="button" variant="outline" onClick={prevStep} className="px-8 h-12 bg-transparent">
                           {REGISTER_TEXTS.buttons.previous}
-                        </Button>
+                        </Button> */}
+                        <span></span>
                         <Button
                           type="button"
                           onClick={nextStep}
@@ -431,7 +627,7 @@ export default function RegisterForm() {
 
                 {/* Step 3: Plan Selection & Terms */}
                 {currentStep === 3 && (
-                  <Card  className="shadow-2xl  border-0 backdrop-blur-sm bg-white/80 animate-slide-up">
+                  <Card className="shadow-2xl  border-0 backdrop-blur-sm bg-white/80 animate-slide-up">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 text-2xl">
                         <CreditCard className="w-6 h-6 text-green-600" />
@@ -439,17 +635,17 @@ export default function RegisterForm() {
 
                       </CardTitle>
                     </CardHeader>
-                    <CardContent  className="space-y-6   px-4">
+                    <CardContent className="space-y-6   px-4">
                       <div className="grid md:grid-cols-3 gap-4">
                         {REGISTER_TEXTS.plan_types.map((plan, index) => (
                           <div
                             key={plan.id}
-                            className={`relative border rounded-xl p-6 cursor-pointer transition-all duration-300 animate-fade-in-up ${formData.planType === plan.id
+                            className={`relative border rounded-xl p-6 cursor-pointer transition-all duration-300 animate-fade-in-up ${formData.planType === plan.value
                               ? "border-green-500 bg-green-50 shadow-lg scale-105"
                               : "border-gray-200 hover:border-gray-300 hover:shadow-md"
                               }`}
                             style={{ animationDelay: `${200 + index * 100}ms` }}
-                            onClick={() => setFormData((prev) => ({ ...prev, planType: plan.id }))}
+                            onClick={() => setFormData((prev) => ({ ...prev, planType: plan.value }))}
                           >
                             {plan.popular_label && (
                               <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-500 hover:bg-green-500">
@@ -498,7 +694,7 @@ export default function RegisterForm() {
                         <div className="flex items-start space-x-3">
                           <Checkbox
                             id="agreeTerms"
-                            required
+                            // required
                             className="border-gray-300 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500 mt-1"
                             onCheckedChange={(checked) =>
                               setFormData((prev) => ({ ...prev, agreeTerms: checked as boolean }))
@@ -530,13 +726,15 @@ export default function RegisterForm() {
                           </Label>
                         </div>
                       </div>
+                      <MessageBox message={message} closeMessage={closeMessage} />
 
                       <div className="flex justify-between animate-fade-in-up animation-delay-1000">
-                        <Button type="button" variant="outline" onClick={prevStep} className="px-8 h-12 bg-transparent">
+                        {/* <Button type="button" variant="outline" onClick={prevStep} className="px-8 h-12 bg-transparent">
                           {REGISTER_TEXTS.buttons.previous}
-                        </Button>
+                        </Button> */}
+                        <span></span>
                         <Button
-                          type="submit"
+                          onClick={SavePlanInfo}
                           className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 px-8 h-12 shadow-lg hover:shadow-xl transition-all duration-300"
                           disabled={isSubmitting}
                         >

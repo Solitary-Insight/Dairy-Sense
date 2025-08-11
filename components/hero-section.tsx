@@ -8,7 +8,7 @@ export default function HeroSection() {
   const { language, meta, dir } = useLanguage()
   const HERO_TEXTS = LANG_STRINGS[language].hero
   return (
-    <section  className={`font-${LANG_STRINGS[language].class}`} dir={LANG_META[language].dir}>
+    <section  className={`font-${LANG_STRINGS[language].meta.class}`} dir={dir}>
       <section
         id="home"
         className="relative bg-gradient-to-br from-green-50 to-emerald-50 py-20 lg:py-32 overflow-hidden"

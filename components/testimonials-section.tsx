@@ -37,7 +37,7 @@ export default function TestimonialsSection() {
 
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {TESTIMONIALS['list'].map((testimonial, index) => (
-            <Card dir={LANG_META[language].dir} key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <Card dir={dir} key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <CardContent className="p-8">
                 <div className="space-y-6">
                   {/* Quote Icon */}

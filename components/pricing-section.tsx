@@ -10,7 +10,7 @@ export default function PricingSection() {
   const { dir, meta, language } = useLanguage()
   const PRICING_TEXTS = LANG_STRINGS[language].pricing;
   return (
-    <section dir={LANG_META[language].dir} id="pricing" className="py-20 bg-white">
+    <section dir={dir} id="pricing" className="py-20 bg-white">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">{PRICING_TEXTS.title}</h2>

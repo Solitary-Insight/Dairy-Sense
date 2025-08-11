@@ -1,6 +1,35 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* html, body, #root {
+  height: 100%;
+} */
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.mirror {
+  transform: rotate(270deg) !important;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+.font-urdu {
+  font-family: "Noto Nastaliq Urdu";
+  line-height: 3.5rem !important;
+
+}
+
 @font-face {
   font-family: 'Noto Nastaliq Urdu';
   src: url('/fonts/NotoNastaliqUrdu-Regular.ttf') format('truetype');
@@ -8,6 +37,33 @@
   font-style: normal;
   font-display: swap;
 }
+
+@keyframes animate-in {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes animate-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+
+
 
 @font-face {
   font-family: 'Noto Nastaliq Urdu';
@@ -40,6 +96,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'Roboto Mono';
   src: url('/fonts/RobotoMono/RobotoMono-ThinItalic.ttf') format('truetype');
@@ -55,6 +112,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'Roboto Mono';
   src: url('/fonts/RobotoMono/RobotoMono-ExtraLightItalic.ttf') format('truetype');
@@ -70,6 +128,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'Roboto Mono';
   src: url('/fonts/RobotoMono/RobotoMono-LightItalic.ttf') format('truetype');
@@ -85,6 +144,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'Roboto Mono';
   src: url('/fonts/RobotoMono/RobotoMono-Italic.ttf') format('truetype');
@@ -100,6 +160,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'Roboto Mono';
   src: url('/fonts/RobotoMono/RobotoMono-MediumItalic.ttf') format('truetype');
@@ -115,6 +176,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'Roboto Mono';
   src: url('/fonts/RobotoMono/RobotoMono-SemiBoldItalic.ttf') format('truetype');
@@ -130,6 +192,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'Roboto Mono';
   src: url('/fonts/RobotoMono/RobotoMono-BoldItalic.ttf') format('truetype');
@@ -146,6 +209,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: 'Roboto Mono Variable';
   src: url('/fonts/RobotoMono/RobotoMono-Italic-VariableFont_wght.ttf') format('truetype');
@@ -225,6 +289,7 @@ body {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -236,6 +301,7 @@ body {
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -247,6 +313,7 @@ body {
     opacity: 0;
     transform: translateY(50px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -254,10 +321,12 @@ body {
 }
 
 @keyframes bounce-gentle {
+
   0%,
   100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-10px);
   }
@@ -267,12 +336,15 @@ body {
   0% {
     transform: translate(0px, 0px) scale(1);
   }
+
   33% {
     transform: translate(30px, -50px) scale(1.1);
   }
+
   66% {
     transform: translate(-20px, 20px) scale(0.9);
   }
+
   100% {
     transform: translate(0px, 0px) scale(1);
   }
@@ -363,5 +435,3 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #16a34a;
 }
-
-

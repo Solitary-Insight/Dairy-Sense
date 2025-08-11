@@ -3,7 +3,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { LANG_STRINGS, LANG_META } from "../lib/Constants/App/language";
+import { LANG_STRINGS } from "../lib/Constants/App/language";
 import { LANG_LOG_KEY } from "@/lib/Constants/Debugging/LogKeys";
 import {saveLanguageLocally, getLang } from '@/lib/Utils/Browser/browserUtils';
 
@@ -12,13 +12,15 @@ const LanguageContext = createContext();
 export function LanguageProvider({ children }) {
     const defaultLang = 'en';
     const [language, setLanguage] = useState(defaultLang);
-    const [dir, setDir] = useState(LANG_META[defaultLang].dir);
+    const [dir, setDir] = useState(LANG_STRINGS[defaultLang].meta.dir);
 
     useEffect(() => {
 
         const detectedLangFull = getLang();
-        const shortLang = detectedLangFull.split('-')[0] || defaultLang;
-        const meta = LANG_META[shortLang] || LANG_META[defaultLang];
+        console.log("D_LANG: ",detectedLangFull)
+        const shortLang = detectedLangFull.split('-')[0] ?? defaultLang;
+        // const shortLang ='en';
+        const meta =LANG_STRINGS[shortLang].meta || LANG_STRINGS[defaultLang].meta;
 
         setLanguage(shortLang);
         setDir(meta.dir);
@@ -34,7 +36,7 @@ export function LanguageProvider({ children }) {
     }, []);
 
     const changeLanguage = (newLang) => {
-        const meta = LANG_META[newLang] || LANG_META[defaultLang];
+        const meta = LANG_STRINGS[newLang].meta ||LANG_STRINGS[defaultLang].meta;
         setLanguage(newLang);
         setDir(meta.dir);
 
@@ -46,7 +48,7 @@ export function LanguageProvider({ children }) {
     };
 
     return (
-        <LanguageContext.Provider value={{language_strings:LANG_STRINGS[language], language, changeLanguage, dir,inverted_dir:dir=='rtl'?'ltr':'rtl', meta: LANG_META[language] }}>
+        <LanguageContext.Provider value={{ language, changeLanguage,language_strings:LANG_STRINGS[language], dir,inverted_dir:dir=='rtl'?'ltr':'rtl', meta: LANG_STRINGS[language].meta }}>
             {children}
         </LanguageContext.Provider>
     );

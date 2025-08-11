@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { useLanguage } from "@/hooks/useLanguage"
-import { LANG_STRINGS, LANG_META } from "@/lib/Constants/App/language"
+import { DairySense } from "@/lib/Constants/App/DairySenseData/DairySense"
+import { LANG_STRINGS } from "@/lib/Constants/App/language"
 import { Heart, Milk, Users, Truck, BarChart3, ShoppingCart, Activity, MapPin } from "lucide-react"
 
 
@@ -19,8 +20,8 @@ export default function FeaturesSection() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {FEATURES_TEXT.items.map((feature, index) => (
-            <Card dir={LANG_META[language].dir} key={index} className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md">
+          {new DairySense(language).getDSFeatures().map((feature, index) => (
+            <Card dir={LANG_STRINGS[language].meta.dir} key={index} className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md">
               <CardContent className="p-6">
                 <div className="space-y-4">
                   <div

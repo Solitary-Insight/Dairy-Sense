@@ -35,19 +35,19 @@ export default function SensorSystemSection() {
                 className="w-full h-auto"
               />
               {/* Sensor callouts */}
-              <div dir={LANG_META[language].dir} className="absolute top-1/4 right-4 bg-white rounded-lg p-3 shadow-lg">
+              <div dir={dir} className="absolute top-1/4 right-4 bg-white rounded-lg p-3 shadow-lg">
                 <div className="flex items-center gap-2 text-sm">
                   <Activity className="w-4 h-4 text-blue-500" />
                   <span className="font-medium">{SENSORY_TEXT.imu_active}</span>
                 </div>
               </div>
-              <div dir={LANG_META[language].dir} className="absolute top-1/2 left-4 bg-white rounded-lg p-3 shadow-lg">
+              <div dir={dir} className="absolute top-1/2 left-4 bg-white rounded-lg p-3 shadow-lg">
                 <div className="flex items-center gap-2 text-sm">
                   <MapPin className="w-4 h-4 text-green-500" />
                   <span className="font-medium">{SENSORY_TEXT.gpa_signal}</span>
                 </div>
               </div>
-              <div  dir={LANG_META[language].dir} className="absolute bottom-1/4 right-8 bg-white rounded-lg p-3 shadow-lg">
+              <div  dir={meta.dir} className="absolute bottom-1/4 right-8 bg-white rounded-lg p-3 shadow-lg">
                 <div className="flex items-center gap-2 text-sm">
                   <Thermometer className="w-4 h-4 text-red-500" />
                   <span className="font-medium">{SENSORY_TEXT.temp}</span>
@@ -57,7 +57,7 @@ export default function SensorSystemSection() {
           </div>
 
           {/* Right - Content */}
-          <div dir={LANG_META[language].dir} className="space-y-8">
+          <div dir={meta.dir} className="space-y-8">
             <div className="space-y-4">
               <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">{SENSORY_TEXT.badge}</Badge>
               <h2 className="text-4xl font-bold text-gray-900">{SENSORY_TEXT.title}</h2>
@@ -68,7 +68,7 @@ export default function SensorSystemSection() {
 
             <div className="grid sm:grid-cols-2 gap-4">
               {sensorFeatures.map((feature, index) => (
-                <Card dir={LANG_META[language].dir} key={index} className="border-0 shadow-sm">
+                <Card dir={meta.dir} key={index} className="border-0 shadow-sm">
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
                       <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center flex-shrink-0">
@@ -84,7 +84,7 @@ export default function SensorSystemSection() {
               ))}
             </div>
 
-            <div dir={LANG_META[language].dir} className="bg-white rounded-xl p-6 shadow-sm border">
+            <div dir={meta.dir} className="bg-white rounded-xl p-6 shadow-sm border">
               <h3 className="font-semibold text-gray-900 mb-3">{SENSORY_TEXT.key_capablities}</h3>
               <ul className="space-y-2 text-gray-600">
 

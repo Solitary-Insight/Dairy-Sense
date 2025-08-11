@@ -77,7 +77,7 @@ export function AppSidebar() {
             <span className="text-white font-bold text-lg">A</span>
           </div>
           <div>
-            <h2 className="font-bold text-lg text-gray-900">AgroSense</h2>
+            <h2 className="font-bold text-lg text-gray-900">DairySense</h2>
             <p className="text-sm text-gray-600">Farm Dashboard</p>
           </div>
         </div>

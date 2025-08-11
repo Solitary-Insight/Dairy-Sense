@@ -10,7 +10,7 @@ import PricingSection from "@/components/pricing-section"
 import Footer from "@/components/footer"
 import LiveChat from "@/components/live-chat"
 import { useLanguage } from "@/hooks/useLanguage"
-import { LANG_META } from "@/lib/Constants/App/language"
+import {  LANG_STRINGS } from "@/lib/Constants/App/language"
 
 
 
@@ -19,10 +19,9 @@ export default function App() {
 
   return (
 
-    <div className={`min-h-screen bg-white font-${LANG_META[language].class}`} dir={dir}>
+    <div className={`min-h-screen bg-white font-${meta.class}`} dir={dir}>
      
-    <span className="font-urdu"></span>
-    <span className="font-english"></span>
+    
       <Header />
       <main>
         <HeroSection />

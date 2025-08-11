@@ -12,21 +12,32 @@ import { Eye, EyeOff, Lock, Mail, Leaf } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useLanguage } from "@/hooks/useLanguage"
-import { LANG_STRINGS } from "@/lib/Constants/App/language"
 import { cn } from "@/lib/Utils/utils"
+import MessageBox from "./ui/messageBox"
+import { error } from "console"
+import { login, OwnController } from "@/app/register/controller/Owner.Controller"
+import { FLAG_SAVE_LOGIN_MAIL, FLAG_SAVE_LOGIN_PASS } from "@/lib/Constants/App/Keys"
+import { validateUserFromCookies } from "@/app/register/controller/CookiesValidator"
+import { navigateUserBasedOnCookie } from "@/lib/Utils/Navigation/AuthBasedNavigation"
+import { SaveInLocalStorage } from "@/lib/Utils/Storage/LocalStorageHandler"
 
 export default function LoginForm() {
   const { language, dir, meta, language_strings } = useLanguage()
 
+  // Or spinner
+  const [message, setMessage] = useState({ message: null, type: null, collapsable: true })
 
-  const LOGIN_TEXTS = language_strings['login']['form']
+  const LOGIN_TEXTS = language_strings.login.form || {}
+  const owner_controller = new OwnController()
+
+
 
 
   const router = useRouter()
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    rememberMe: false,
+    rememberMe: true,
   })
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -34,40 +45,126 @@ export default function LoginForm() {
 
   useEffect(() => {
     setMounted(true)
+
   }, [])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // 
+  // INFO : Load if email password saved in browser
+  useEffect(() => {
+    function loadEmailPassFromLocalStorage() {
+      const email = localStorage.getItem(FLAG_SAVE_LOGIN_MAIL)
+      const password = localStorage.getItem(FLAG_SAVE_LOGIN_PASS)
+
+      setFormData({ rememberMe: (email?.length != 0 || password?.length != 0), email: email ?? '', password: password ?? "" })
+    }
+    formData
+    loadEmailPassFromLocalStorage()
+  }, [])
+
+  // INFO: COSE MESSAGE BOX IN COMPONENT 
+  function closeMessage() {
+    setMessage({ message: null, type: null, collapsable: true })
+
+  }
+
+  // INFO: SHOW MESSAGE BOX IN COMPONENT 
+  function showMessage(message, type = "INFO", auto_close = true, collapsable = true) {
+    setMessage({ message, type, collapsable: collapsable })
+    if (!auto_close) return
+    setTimeout(() => {
+      closeMessage()
+    }, 3000)
+
+  }
+
+
+  //INFO:  VALIDATE IF USER IS ALREADY LOGGED IN OR NOT
+
+  //INFO: Check and validate auth-token 
+  useEffect(() => {
+
+
+
+    // INFO: Request server to validate existing user--------------
+    validateUserFromCookies({
+      onValidationSuccess: (res) => {
+
+        // -------------Result -----------------
+        console.log("[AUTH RESPONSE]: ", res.data)
+        const user = res.data.user
+        const registered_farms = res.data.registered_farms
+        const fields = { user, registered_farms }
+
+        navigateUserBasedOnCookie(
+          {
+            fields,
+            onUserWithNoOTPVerification: () => {
+              router.push('register')
+            },
+            onAdministarterAccount:()=>{
+              router.push("admin")
+            },
+            // TODO: Call FUNCTION TO SAVE LOCALLY;
+            // onUserWithFarmsFound: (farms) => {
+            //   console.log('farms', JSON.stringify(farms, null, 2)),
+
+            //     SaveInLocalStorage({ data: JSON.stringify(farms), key: FARM_SAVE_KEY })
+
+            //   router.push('/farm-selection')
+
+            // },
+            onUserWithNoFarmFound: () => { router.push('register')},
+            onUserWithOTPVerification: (user) => {
+              console.log('user', JSON.stringify(user, null, 2))
+            }
+          }
+        )
+      }
+    })
+
+
+
+  }, [])
+
+
+  // INFO : Login Owner account here 
+  const LoginAccount = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-
+    const { email, password, rememberMe } = formData
+    const payload = {
+      email, password, rememberMe,
+      onSuccess: () => {
+        setTimeout(() => {
+          router.push("farm-selection")
+        }, 100)
+      },
+      onResponse: (message, error) => {
+        showMessage(message, error)
+      }
+    }
+    setIsLoading(true)
+    await owner_controller.login(payload)
     setIsLoading(false)
-    // Redirect to OTP verification
-    router.push("/verify-otp")
+
+
   }
 
   if (!mounted) return null
 
   return (
-   
+
     <div
       className={cn(
-            `rounded-3xl bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4`,
-            meta.dir === "rtl"
-              ? `font-${language} leading-[2.25rem] tracking-[0.05em] text-right`
-              : `font-${language}`
-          )}
-     
-     
-     >
+        `rounded-3xl bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4`,
+        meta.dir === "rtl"
+          ? `font-${meta.class} leading-[2.25rem] tracking-[0.05em] text-right`
+          : `font-${meta.class}`
+      )}
+
+
+    >
       {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-emerald-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-40 left-40 w-80 h-80 bg-teal-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
-      </div>
 
       <div className="relative w-full max-w-md">
         {/* Logo Animation */}
@@ -87,7 +184,7 @@ export default function LoginForm() {
             <CardTitle className="text-2xl text-center text-gray-900">{LOGIN_TEXTS.login_form_heading}</CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={LoginAccount} className="space-y-6">
               <div className="space-y-2 animate-fade-in-up animation-delay-200">
                 <Label htmlFor="email" className="text-gray-700 font-medium">
                   {LOGIN_TEXTS.login_email_label}
@@ -100,7 +197,6 @@ export default function LoginForm() {
                     type="email"
                     placeholder={LOGIN_TEXTS.login_email_placeholder}
                     className="pl-11 h-12 border-gray-200 focus:border-green-500 focus:ring-green-500 transition-all duration-300"
-                    required
                     value={formData.email}
                     onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
                   />
@@ -119,7 +215,6 @@ export default function LoginForm() {
                     type={showPassword ? "text" : "password"}
                     placeholder={LOGIN_TEXTS.login_password_placeholder}
                     className="pl-11 pr-11 h-12 border-gray-200 focus:border-green-500 focus:ring-green-500 transition-all duration-300"
-                    required
                     value={formData.password}
                     onChange={(e) => setFormData((prev) => ({ ...prev, password: e.target.value }))}
                   />
@@ -137,6 +232,7 @@ export default function LoginForm() {
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="rememberMe"
+                    checked={formData.rememberMe}
                     className="border-gray-300 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500"
                     onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, rememberMe: checked as boolean }))}
                   />
@@ -148,6 +244,7 @@ export default function LoginForm() {
                   {LOGIN_TEXTS.login_forget_password_label}
                 </Link>
               </div>
+              <MessageBox message={message} closeMessage={closeMessage} />
 
               <Button
                 type="submit"

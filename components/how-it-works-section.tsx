@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { useLanguage } from "@/hooks/useLanguage"
+import { DairySense } from "@/lib/Constants/App/DairySenseData/DairySense"
 import { LANG_STRINGS } from "@/lib/Constants/App/language"
 import { ArrowRight,} from "lucide-react"
 
@@ -24,7 +25,8 @@ export default function HowItWorksSection() {
             {/* Connection lines for desktop */}
             <div className="hidden md:block absolute top-1/2 left-1/3 right-1/3 h-0.5 bg-gradient-to-r from-green-200 to-purple-200 -translate-y-1/2 z-0"></div>
 
-            {PROCEDURE_TEXT.steps.map((step, index) => (
+            { 
+            new DairySense(language).getConfigurationSteps().map((step, index) => (
               <div key={index} className="relative z-10">
                 <Card className="text-center border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
                   <CardContent className="p-8">
@@ -41,12 +43,12 @@ export default function HowItWorksSection() {
                   </CardContent>
                 </Card>
 
-                {/* Arrow for mobile */}
-                {index < PROCEDURE_TEXT.steps.length - 1 && (
+                {/* Arrow for mobile
+                {index < 2 && (
                   <div className="md:hidden flex justify-center mt-4 mb-4">
                     <ArrowRight className="w-6 h-6 text-gray-300" />
                   </div>
-                )}
+                )} */}
               </div>
             ))}
           </div>

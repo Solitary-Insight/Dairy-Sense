@@ -1,22 +1,73 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { MessageCircle, X, Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useLanguage } from "@/hooks/useLanguage"
-import { LANG_STRINGS, LANG_META } from "@/lib/Constants/App/language"
+import { LANG_STRINGS } from "@/lib/Constants/App/language"
+import io from "socket.io-client";
+import { SERVER_ADDRESS } from "@/lib/Constants/App/API_ENDPOINTS"
+import { SOCKET_CHAT_MESSAGE_EVENT_SEND_QUERY } from "@/lib/Constants/App/Tages"
+
 
 export default function LiveChat() {
   const [isOpen, setIsOpen] = useState(false)
   const [message, setMessage] = useState("")
-  const { language, meta, dir,language_strings } = useLanguage()
+  const { language, meta, dir, language_strings } = useLanguage()
   const CHAT_TEXT = language_strings.chat;
+  const [messages, setMessages] = useState([{ content: CHAT_TEXT.initial_message, sender: "server" }])
+  const [isConnected, setConnected] = useState(false);
+  const [webSocket, SetWebSocket] = useState(null)
+
+
+  const message_box_bottom_ref = useRef(null)
+
+
+
+  useEffect(()=>{
+      message_box_bottom_ref.current?.scrollIntoView({ behavior: "smooth" });
+
+  })
+  const addMessage = (newMsg) => {
+   setMessages(prevMessages => [...prevMessages, newMsg]);
+
+  };
+
+  useEffect(() => {
+    const socket = io(SERVER_ADDRESS+'/info-chat')
+
+    SetWebSocket(socket)
+    socket.on("connect", (socket) => {
+      console.log("Socket connected")
+    })
+    socket.on("info-chat-response", (socket) => {
+      addMessage({ content: socket, sender: "server" })
+    })
+
+
+
+
+  }, [])
+
+
+
+  function sendMessage(message) {
+    if (!webSocket || !webSocket.active) {
+      console.log("Socket issue ")
+      return
+    }
+    if (message.trim().length == 0) return
+    webSocket.emit("info-chat-start", message)
+    addMessage({ content: message, sender: "user" })
+    setMessage('')
+
+  }
   return (
     <>
       {/* Chat Widget */}
       {isOpen && (
-        <div dir={LANG_META[language].dir} className="fixed bottom-20 right-4 w-80 z-50">
+        <div dir={LANG_STRINGS[language].meta.dir} className="fixed bottom-20 right-4 w-80 z-50">
           <Card className="shadow-2xl border-0">
             <CardHeader className="bg-green-600 text-white rounded-t-lg">
               <div className="flex items-center justify-between">
@@ -33,13 +84,13 @@ export default function LiveChat() {
             </CardHeader>
             <CardContent className="p-4 space-y-4">
               <div className="h-48 bg-gray-50 rounded-lg p-3 overflow-y-auto">
-                <div className="space-y-3">
-                  <div className="bg-white rounded-lg p-2 shadow-sm">
-                    <p className="text-sm leading-loose text-gray-700">
-                      {CHAT_TEXT.initial_message}
-                    </p>
-                  </div>
+                <div className="space-y-3 pb-5">
+                  {/* -------------Messages--------------- */}
+                  {messages.map((msg) => <MessageItem message={msg} />)}
+                  <span ref={message_box_bottom_ref}></span>
+
                 </div>
+
               </div>
               <div className="flex align-center gap-2">
                 <input
@@ -48,11 +99,13 @@ export default function LiveChat() {
 
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  className="flex-1  px-3 py-2 border border-gray-300 rounded-lg textloose-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="flex-1  px-3  messagesborder border-gray-300 rounded-lg textloose-sm focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
-                <Button size="sm" className="bg-green-600 mt-2 hover:bg-green-700">
-                  <Send className="w-4 h-4" />
-                </Button>
+                <div className={`${dir == "rtl" ? "mirror" : ""}`}>
+                  <Button onClick={() => { sendMessage(message) }} size="sm" className="bg-green-600  text-white font-bold  hover:bg-green-700">
+                    <Send className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -69,4 +122,23 @@ export default function LiveChat() {
       </Button>
     </>
   )
+
+
+
+  function MessageItem({ message }) {
+    return (
+      <div
+        className={`max-w-[70%] mb-2 p-3 rounded-xl shadow-md text-sm 
+          ${message.sender === "user"
+            ? "bg-green-100 text-green-900 self-end ml-auto"
+            : "bg-gray-100 text-gray-800 self-start mr-auto"
+          }`}
+      >
+        <p className="leading-relaxed whitespace-pre-line break-words">
+          {message.content}
+        </p>
+      </div>
+    );
+  }
+
 }

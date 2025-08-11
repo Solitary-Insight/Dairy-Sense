@@ -1,8 +1,17 @@
 "use client"
 
-import type React from "react"
 
-import { useState } from "react"
+
+// BUG : "THIS SECTION NEED TO BE REMOVED LATER "
+import { fillTestDemoData } from '@/lib/Constants/App/Testing/Dummy Data_For_Testing.js'
+
+
+
+
+
+import type React from "react"
+import { DemoController } from '@/app/demo/demo-controller'
+import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -11,8 +20,26 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Calendar, Clock, Users, MapPin, Phone, Mail, Building } from "lucide-react"
-
+import MessageBox from "./ui/messageBox"
+import { getLangResposiveClasses, scrollElementCenter } from "@/lib/Utils/Browser/browserUtils"
+import { DairySense } from '@/lib/Constants/App/DairySenseData/DairySense'
+import { useLanguage } from '@/hooks/useLanguage'
+import { cn } from '@/lib/Utils/utils'
+const PERSONAL_INFO = "PERSONAL_INFO";
+const FARM_INFO = "FARM_INFO";
+const DEMO_PREFER = "DEMO_PREFER";
+const sections = [PERSONAL_INFO, FARM_INFO, DEMO_PREFER];
 export default function DemoRequestForm() {
+  const [message, setMessage] = useState({ message: null, type: null, collapsable: true })
+  const [error_section, SetErrorSection] = useState(PERSONAL_INFO)
+
+  //INFO Message boxes references 
+  const personal_info_mb = useRef(null)
+  const farm_info_mb = useRef(null)
+  const demo_prefer_mb = useRef(null)
+  const mb_refs = [personal_info_mb, farm_info_mb, demo_prefer_mb]
+
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -24,319 +51,417 @@ export default function DemoRequestForm() {
     currentSystem: "",
     preferredDate: "",
     preferredTime: "",
-    specificInterests: [],
     additionalNotes: "",
+
+    cattleHealthMonitoringRequired: false,
+    milkProductionTrackingRequired: false,
+    smartCollarTechnologyRequired: false,
+    financeManagementRequired: false,
+    hrAndPayrolRequired: false,
+    marketPlaceIntegrationRequired: false,
+    feedManagementRequired: false,
+    breedingRecordsRequired: false,
     installmentInterest: false,
   })
 
+  // BUG : "NEED TO REMOVED IN PRODUCTIO"
+  useEffect(() => { setFormData(fillTestDemoData()) }, [])
+
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const { language, dir, language_strings, meta } = useLanguage()
+  const DEMO_REQ_TEXTS = language_strings.demo
+
+  const ds = new DairySense(language)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000))
+    const demo_controller = new DemoController(formData)
+    demo_controller.saveDemoRecord(
+      {
+        onSuccess: () => {
+          setIsSubmitting(false)
+          SetErrorSection(sections[2])
+          showMessage(['normal_msg', "DEMO_REQ_SUCCESS", 'message'], "SUCCESS")
+          setTimeout(() => {
+            setIsSubmitted(true)
 
-    setIsSubmitting(false)
-    setIsSubmitted(true)
+
+          }, 3000)
+
+        },
+
+        onResponse: (message, type, stage) => {
+          setIsSubmitting(false)
+          SetErrorSection(sections[stage])
+          showMessage(message, type, true, true);
+
+          scrollElementCenter({ element: mb_refs[stage], delay: 100 })
+        },
+        onFailed: () => {
+          SetErrorSection(sections[2])
+          showMessage(['normal_msg', "DEMO_REQ_FAILED", 'message'], "SUCCESS")
+
+          setIsSubmitting(false)
+        }
+
+      }
+    )
+    console.log('demo_controller', JSON.stringify(demo_controller, null, 2))
+
+
   }
 
-  const handleInterestChange = (interest: string, checked: boolean) => {
-    setFormData((prev) => ({
-      ...prev,
-      specificInterests: checked
-        ? [...prev.specificInterests, interest]
-        : prev.specificInterests.filter((i) => i !== interest),
-    }))
+  // ----------------------HELPER FUNCTIONS ----------------/
+  // INFO: COSE MESSAGE BOX IN COMPONENT 
+  function closeMessage() {
+    setMessage({ message: null, type: null, collapsable: true })
+
   }
+
+
+
+  // INFO: SHOW MESSAGE BOX IN COMPONENT 
+  function showMessage(message, type = "INFO", auto_close = true, collapsable = true) {
+
+    setMessage({ message, type, collapsable: collapsable })
+
+
+    if (!auto_close) return
+    setTimeout(() => {
+      closeMessage()
+    }, 3000)
+
+  }
+
+
 
   if (isSubmitted) {
     return (
-      <Card className="max-w-2xl mx-auto">
-        <CardContent className="p-12 text-center">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-              <span className="text-white text-lg">✓</span>
-            </div>
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Demo Request Submitted!</h2>
-          <p className="text-gray-600 mb-6">
-            Thank you for your interest in AgroSense. Our team will contact you within 24 hours to schedule your
-            personalized demo.
+      <div className={`font-${meta.class}`}>
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">{DEMO_REQ_TEXTS.title}</h1>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            {DEMO_REQ_TEXTS.tagline}
           </p>
-          <Button asChild>
-            <a href="/">Return to Home</a>
-          </Button>
-        </CardContent>
-      </Card>
+        </div>
+        <Card className={cn(getLangResposiveClasses(meta), "max-w-2xl mx-auto")} dir='dir'>
+          <CardContent className="p-12 text-center">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-lg">✓</span>
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">{DEMO_REQ_TEXTS.demo_submitted.heading}</h2>
+            <p className="text-gray-600 mb-6">
+              {DEMO_REQ_TEXTS.demo_submitted.sub_heading}
+            </p>
+            <Button asChild>
+              <a href="/">{DEMO_REQ_TEXTS.demo_submitted.back_btn_text}</a>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     )
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="grid lg:grid-cols-3 gap-8">
-        {/* Main Form */}
-        <div className="lg:col-span-2 space-y-8">
-          {/* Personal Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-green-600" />
-                Personal Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="firstName">First Name *</Label>
-                  <Input
-                    id="firstName"
-                    required
-                    value={formData.firstName}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, firstName: e.target.value }))}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="lastName">Last Name *</Label>
-                  <Input
-                    id="lastName"
-                    required
-                    value={formData.lastName}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, lastName: e.target.value }))}
-                  />
-                </div>
-              </div>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="email">Email Address *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="phone">Phone Number *</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    required
-                    value={formData.phone}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Farm Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Building className="w-5 h-5 text-green-600" />
-                Farm Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="farmName">Farm Name *</Label>
-                <Input
-                  id="farmName"
-                  required
-                  value={formData.farmName}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, farmName: e.target.value }))}
-                />
-              </div>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="location">Location (City, State) *</Label>
-                  <Input
-                    id="location"
-                    required
-                    value={formData.location}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, location: e.target.value }))}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="cattleCount">Number of Cattle *</Label>
-                  <Select onValueChange={(value) => setFormData((prev) => ({ ...prev, cattleCount: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select range" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1-50">1-50 cattle</SelectItem>
-                      <SelectItem value="51-100">51-100 cattle</SelectItem>
-                      <SelectItem value="101-200">101-200 cattle</SelectItem>
-                      <SelectItem value="201-500">201-500 cattle</SelectItem>
-                      <SelectItem value="500+">500+ cattle</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="currentSystem">Current Management System</Label>
-                <Select onValueChange={(value) => setFormData((prev) => ({ ...prev, currentSystem: value }))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select current system" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="manual">Manual/Paper-based</SelectItem>
-                    <SelectItem value="basic-software">Basic Farm Software</SelectItem>
-                    <SelectItem value="spreadsheets">Excel/Spreadsheets</SelectItem>
-                    <SelectItem value="other-platform">Other Digital Platform</SelectItem>
-                    <SelectItem value="none">No System Currently</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Demo Preferences */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-green-600" />
-                Demo Preferences
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="preferredDate">Preferred Date</Label>
-                  <Input
-                    id="preferredDate"
-                    type="date"
-                    value={formData.preferredDate}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, preferredDate: e.target.value }))}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="preferredTime">Preferred Time</Label>
-                  <Select onValueChange={(value) => setFormData((prev) => ({ ...prev, preferredTime: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select time" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="morning">Morning (9 AM - 12 PM)</SelectItem>
-                      <SelectItem value="afternoon">Afternoon (12 PM - 5 PM)</SelectItem>
-                      <SelectItem value="evening">Evening (5 PM - 8 PM)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div>
-                <Label className="text-base font-medium">Specific Areas of Interest</Label>
-                <div className="grid md:grid-cols-2 gap-3 mt-3">
-                  {[
-                    "Cattle Health Monitoring",
-                    "Milk Production Tracking",
-                    "Smart Collar Technology",
-                    "Financial Management",
-                    "HR & Payroll",
-                    "Marketplace Integration",
-                    "Feed Management",
-                    "Breeding Records",
-                  ].map((interest) => (
-                    <div key={interest} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={interest}
-                        onCheckedChange={(checked) => handleInterestChange(interest, checked as boolean)}
-                      />
-                      <Label htmlFor={interest} className="text-sm">
-                        {interest}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="additionalNotes">Additional Notes or Questions</Label>
-                <Textarea
-                  id="additionalNotes"
-                  rows={4}
-                  placeholder="Tell us about your specific needs or any questions you have..."
-                  value={formData.additionalNotes}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, additionalNotes: e.target.value }))}
-                />
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="installmentInterest"
-                  onCheckedChange={(checked) =>
-                    setFormData((prev) => ({ ...prev, installmentInterest: checked as boolean }))
-                  }
-                />
-                <Label htmlFor="installmentInterest" className="text-sm">
-                  I'm interested in learning about installment payment options
-                </Label>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? "Submitting Request..." : "Request Demo"}
-          </Button>
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">What to Expect</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex gap-3">
-                <Clock className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="font-medium">30-45 Minute Demo</h4>
-                  <p className="text-sm text-gray-600">Comprehensive walkthrough of all features</p>
-                </div>
-              </div>
-              <div className="flex gap-3">
-                <Users className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="font-medium">Personalized Experience</h4>
-                  <p className="text-sm text-gray-600">Tailored to your farm's specific needs</p>
-                </div>
-              </div>
-              <div className="flex gap-3">
-                <Phone className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="font-medium">Expert Consultation</h4>
-                  <p className="text-sm text-gray-600">Q&A with our dairy farming specialists</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Contact Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center gap-2 text-sm">
-                <Mail className="w-4 h-4 text-green-600" />
-                <span>demo@agrosense.com</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Phone className="w-4 h-4 text-green-600" />
-                <span>+92 300 1234567</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <MapPin className="w-4 h-4 text-green-600" />
-                <span>Lahore, Pakistan</span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+    <div className={`font-${meta.class}`}>
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">{DEMO_REQ_TEXTS.title}</h1>
+        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          {DEMO_REQ_TEXTS.tagline}
+        </p>
       </div>
-    </form>
+      <form onSubmit={handleSubmit}>
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Animated Background */}
+
+          {/* Main Form */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Personal Information */}
+            <Card className="mb-1">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5 text-green-600" />
+                  {DEMO_REQ_TEXTS.personal_info.heading}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="firstName">{DEMO_REQ_TEXTS.personal_info.first_name}</Label>
+                    <Input
+                      id="firstName"
+                      value={formData.firstName}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, firstName: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="lastName">{DEMO_REQ_TEXTS.personal_info.last_name}</Label>
+                    <Input
+
+                      id="lastName"
+                      value={formData.lastName}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, lastName: e.target.value }))}
+                    />
+                  </div>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="email">{DEMO_REQ_TEXTS.personal_info.email_address}</Label>
+                    <Input
+
+                      id="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="phone">{DEMO_REQ_TEXTS.personal_info.phone_number}</Label>
+                    <Input
+
+                      id="phone"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
+                    />
+                  </div>
+                </div>
+
+              </CardContent>
+            </Card>
+
+            {/* INFO: MESSGE BOX TO SHOW MESSAGE  */}
+            {error_section == PERSONAL_INFO
+              &&
+              <span ref={personal_info_mb}><MessageBox message={message} closeMessage={closeMessage} />
+              </span>
+            }
+
+
+            {/* Farm Information */}
+            <Card >
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Building className="w-5 h-5 text-green-600" />
+                  {DEMO_REQ_TEXTS.farm_info.heading}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="farmName">{DEMO_REQ_TEXTS.farm_info.farm_name}</Label>
+                  <Input
+                    id="farmName"
+                    value={formData.farmName}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, farmName: e.target.value }))}
+                  />
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="location">Location (City, State) *</Label>
+                    <Input
+
+                      id="location"
+                      value={formData.location}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, location: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="cattleCount">{DEMO_REQ_TEXTS.farm_info.number_of_cattle} </Label>
+                    <Select onValueChange={(value) => setFormData((prev) => ({ ...prev, cattleCount: value }))}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={DEMO_REQ_TEXTS.farm_info.select_range} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ds.getCattleCountDropDown().map(({ key, value }) =>
+                          <SelectItem value={key}>{value}</SelectItem>
+
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="currentSystem">{DEMO_REQ_TEXTS.farm_info.current_sytem}</Label>
+                  <Select onValueChange={(value) => setFormData((prev) => ({ ...prev, currentSystem: value }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select current system" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ds.getSystemOptions().map(
+                        ({ key, value }) => <SelectItem value={key}>{value}</SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+            {error_section == FARM_INFO
+              &&
+              <span ref={farm_info_mb}><MessageBox message={message} closeMessage={closeMessage} />
+              </span>
+            }
+
+            {/* Demo Preferences */}
+            <Card >
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-green-600" />
+                  {DEMO_REQ_TEXTS.demo_preferences.heading}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="preferredDate">{DEMO_REQ_TEXTS.demo_preferences.prefered_date}</Label>
+                    <Input
+                      id="preferredDate"
+                      type="date"
+                      value={formData.preferredDate}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, preferredDate: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="preferredTime">{DEMO_REQ_TEXTS.demo_preferences.prefered_time}</Label>
+                    <Select onValueChange={(value) => setFormData((prev) => ({ ...prev, preferredTime: value }))}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={DEMO_REQ_TEXTS.demo_preferences.select_time} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ds.getTimeSlotOptions().map((option) => (
+                          <SelectItem key={option.key} value={option.key}>
+                            {option.value}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="text-base font-medium">{DEMO_REQ_TEXTS.demo_preferences.specific_interest}</Label>
+                  <div className="grid md:grid-cols-2 gap-3 mt-3">
+                    {ds.getFeaturesRequiredOptions().map(({ label, key }) => (
+                      <div key={key} className="flex items-center space-x-2">
+                        <Checkbox
+                          checked={formData[key]}
+                          id={key}
+                          onCheckedChange={(checked) =>
+                            setFormData((prev) => ({ ...prev, [key]: checked }))
+                          }
+                        />
+                        <Label htmlFor={key} className="text-sm">
+                          {label}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="additionalNotes">{DEMO_REQ_TEXTS.demo_preferences.additional_note}</Label>
+                  <Textarea
+                    id="additionalNotes"
+                    rows={4}
+                    placeholder={DEMO_REQ_TEXTS.demo_preferences.additional_note_placeholder}
+                    value={formData.additionalNotes}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, additionalNotes: e.target.value }))}
+                  />
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="installmentInterest"
+                    onCheckedChange={(checked) =>
+                      setFormData((prev) => ({ ...prev, installmentInterest: checked as boolean }))
+                    }
+                  />
+                  <Label htmlFor="installmentInterest" className="text-sm">
+                    {DEMO_REQ_TEXTS.demo_preferences.installment_intrest}
+                  </Label>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* INFO : CARD TO SHOW A MESSAGE  */}
+
+            {error_section == DEMO_PREFER
+              &&
+              <span ref={demo_prefer_mb}><MessageBox message={message} closeMessage={closeMessage} />
+              </span>
+            }
+
+            {/* INFO: MESSGE BOX TO SHOW MESSAGE  */}
+
+            <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Submitting Request..." : "Request Demo"}
+            </Button>
+          </div>
+
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">
+                  {DEMO_REQ_TEXTS.sidebar.what_to_expect}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-3">
+                  <Clock className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium">{DEMO_REQ_TEXTS.sidebar.demo_title}</h4>
+                    <p className="text-sm text-gray-600">{DEMO_REQ_TEXTS.sidebar.demo_desc}</p>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <Users className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium">{DEMO_REQ_TEXTS.sidebar.personalized_title}</h4>
+                    <p className="text-sm text-gray-600">{DEMO_REQ_TEXTS.sidebar.personalized_desc}</p>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <Phone className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium">{DEMO_REQ_TEXTS.sidebar.consultation_title}</h4>
+                    <p className="text-sm text-gray-600">{DEMO_REQ_TEXTS.sidebar.consultation_desc}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">
+                  {DEMO_REQ_TEXTS.sidebar.contact_info}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center gap-2 text-sm">
+                  <Mail className="w-4 h-4 text-green-600" />
+                  <span>{DEMO_REQ_TEXTS.sidebar.email}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Phone className="w-4 h-4 text-green-600" />
+                  <span>{DEMO_REQ_TEXTS.sidebar.phone}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <MapPin className="w-4 h-4 text-green-600" />
+                  <span>{DEMO_REQ_TEXTS.sidebar.location}</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+        </div>
+      </form>
+    </div>
+
   )
 }

@@ -23,8 +23,8 @@ const config: Config = {
   prefix: "",
   theme: {
     fontFamily: {
-      urdu: ['"Noto Nastaliq Urdu"', 'serif'],
-      english: ['"Roboto Mono"', 'monospace'],
+      urdu: ["Noto Nastaliq Urdu", 'serif'],
+      english: ["Roboto Mono", 'monospace'],
     },
     container: {
       center: true,
